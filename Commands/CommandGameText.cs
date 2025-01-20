@@ -17,13 +17,13 @@ public class CommandGameText : ICommand
     [CommandMethod("0 avatar")]
     public async ValueTask getAvatarText(CommandArg arg)
     {
-        if (arg.BasicArgs.Count < 2)
+        if (arg.BasicArgs.Count < 1)
         {
             await arg.SendMsg("Usage: /gametext avatar <language>");
             return;
         }
 
-        var language = arg.BasicArgs[1];
+        var language = arg.BasicArgs[0];
         loadTextMap(language);
 
         StringBuilder output = new();
@@ -39,13 +39,13 @@ public class CommandGameText : ICommand
     [CommandMethod("0 item")]
     public async ValueTask getItemText(CommandArg arg)
     {
-        if (arg.BasicArgs.Count < 2)
+        if (arg.BasicArgs.Count < 1)
         {
             await arg.SendMsg("Usage: /gametext item <language>");
             return;
         }
 
-        var language = arg.BasicArgs[1];
+        var language = arg.BasicArgs[0];
         loadTextMap(language);
 
         StringBuilder output = new();
@@ -60,13 +60,13 @@ public class CommandGameText : ICommand
     [CommandMethod("0 mainmission")]
     public async ValueTask getMainMissionText(CommandArg arg)
     {
-        if (arg.BasicArgs.Count < 2)
+        if (arg.BasicArgs.Count < 1)
         {
             await arg.SendMsg("Usage: /gametext item <language>");
             return;
         }
 
-        var language = arg.BasicArgs[1];
+        var language = arg.BasicArgs[0];
         loadTextMap(language);
 
         StringBuilder output = new();
@@ -81,13 +81,13 @@ public class CommandGameText : ICommand
     [CommandMethod("0 submission")]
     public async ValueTask getSubmissionText(CommandArg arg)
     {
-        if (arg.BasicArgs.Count < 2)
+        if (arg.BasicArgs.Count < 1)
         {
             await arg.SendMsg("Usage: /gametext item <language>");
             return;
         }
 
-        var language = arg.BasicArgs[1];
+        var language = arg.BasicArgs[0];
         loadTextMap(language);
 
         StringBuilder output = new();
