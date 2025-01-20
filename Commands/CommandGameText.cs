@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace DanhengPlugin.DHConsoleCommands.Commands;
 
-[CommandInfo("gametext", "return in-game translation for a certain language", "Usage: /gametext <avatar/item/mainmission/submission> <language>")]
+[CommandInfo("gametext", "return in-game translation for a certain language", "Usage: /gametext <avatar/item/mainmission/submission> #<language>")]
 public class CommandGameText : ICommand
 {
 
@@ -17,14 +17,14 @@ public class CommandGameText : ICommand
     [CommandMethod("0 avatar")]
     public async ValueTask getAvatarText(CommandArg arg)
     {
-        if (arg.BasicArgs.Count < 1)
+        arg.CharacterArgs.TryGetValue("#", out var lang);
+        if (lang == null || lang == "")
         {
-            await arg.SendMsg("Usage: /gametext avatar <language>");
+            await arg.SendMsg("Usage: /gametext avatar #<language>");
             return;
         }
 
-        var language = arg.BasicArgs[0];
-        loadTextMap(language);
+        loadTextMap(lang);
 
         StringBuilder output = new();
         foreach (var avatar in GameData.AvatarConfigData.Values)
@@ -39,14 +39,14 @@ public class CommandGameText : ICommand
     [CommandMethod("0 item")]
     public async ValueTask getItemText(CommandArg arg)
     {
-        if (arg.BasicArgs.Count < 1)
+        arg.CharacterArgs.TryGetValue("#", out var lang);
+        if (lang == null || lang == "")
         {
-            await arg.SendMsg("Usage: /gametext item <language>");
+            await arg.SendMsg("Usage: /gametext item #<language>");
             return;
         }
 
-        var language = arg.BasicArgs[0];
-        loadTextMap(language);
+        loadTextMap(lang);
 
         StringBuilder output = new();
         foreach (var item in GameData.ItemConfigData.Values)
@@ -60,14 +60,14 @@ public class CommandGameText : ICommand
     [CommandMethod("0 mainmission")]
     public async ValueTask getMainMissionText(CommandArg arg)
     {
-        if (arg.BasicArgs.Count < 1)
+        arg.CharacterArgs.TryGetValue("#", out var lang);
+        if (lang == null || lang == "")
         {
-            await arg.SendMsg("Usage: /gametext item <language>");
+            await arg.SendMsg("Usage: /gametext mainmission #<language>");
             return;
         }
 
-        var language = arg.BasicArgs[0];
-        loadTextMap(language);
+        loadTextMap(lang);
 
         StringBuilder output = new();
         foreach (var mission in GameData.MainMissionData.Values)
@@ -81,14 +81,14 @@ public class CommandGameText : ICommand
     [CommandMethod("0 submission")]
     public async ValueTask getSubmissionText(CommandArg arg)
     {
-        if (arg.BasicArgs.Count < 1)
+        arg.CharacterArgs.TryGetValue("#", out var lang);
+        if (lang == null || lang == "")
         {
-            await arg.SendMsg("Usage: /gametext item <language>");
+            await arg.SendMsg("Usage: /gametext submission #<language>");
             return;
         }
 
-        var language = arg.BasicArgs[0];
-        loadTextMap(language);
+        loadTextMap(lang);
 
         StringBuilder output = new();
         foreach (var mission in GameData.SubMissionData.Values)
@@ -102,7 +102,7 @@ public class CommandGameText : ICommand
     [CommandDefault]
     public async ValueTask getGameText(CommandArg arg)
     {
-        await arg.SendMsg("Usage: /gametext <avatar/item/mainmission/submission> <language>");
+        await arg.SendMsg("Usage: /gametext <avatar/item/mainmission/submission> #<language>");
     }
 
     private static void loadTextMap(string lang)
