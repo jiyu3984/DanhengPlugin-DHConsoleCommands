@@ -1,5 +1,5 @@
-﻿using DanhengPlugin.CharacterBuilder.Commands;
-using DanhengPlugin.CharacterBuilder.Data;
+﻿using DanhengPlugin.DHConsoleCommands.Commands;
+using DanhengPlugin.DHConsoleCommands.Data;
 using EggLink.DanhengServer.Command.Command;
 using EggLink.DanhengServer.Data;
 using EggLink.DanhengServer.Enums.Avatar;
@@ -7,20 +7,23 @@ using EggLink.DanhengServer.GameServer.Plugin.Constructor;
 using EggLink.DanhengServer.Internationalization;
 using EggLink.DanhengServer.Util;
 
-namespace DanhengPlugin.CharacterBuilder;
+namespace DanhengPlugin.DHConsoleCommands;
 
-[PluginInfo("CharacterBuilder", "Build your character << lol", "1.0")]
-public class CharacterBuilder : IPlugin
+[PluginInfo("DHConsoleCommands", "DHConsole is ready to use commands", "1.0")]
+public class DHConsoleCommands : IPlugin
 {
-    private readonly Logger _logger = new("CharacterBuilder");
+    private readonly Logger _logger = new("DHConsoleCommands");
 
     public void OnLoad()
     {
         CommandManager.Instance?.RegisterCommand(typeof(CommandBuild));
-        _logger.Info(I18NManager.Translate("CharacterBuilder.LoadedCharacterBuilder"));
+        CommandManager.Instance?.RegisterCommand(typeof(CommandRemove));
+        _logger.Info(I18NManager.Translate("DHConsoleCommands.LoadedDHConsoleCommands"));
         // load data
         ResourceManager.LoadSingleExcel<AvatarRelicRecommendExcel>(typeof(AvatarRelicRecommendExcel));
 
+        PluginConstants.RelicMainAffix.Add(RelicTypeEnum.HEAD, []);
+        PluginConstants.RelicMainAffix.Add(RelicTypeEnum.HAND, []);
         PluginConstants.RelicMainAffix.Add(RelicTypeEnum.BODY, []);
         PluginConstants.RelicMainAffix.Add(RelicTypeEnum.FOOT, []);
         PluginConstants.RelicMainAffix.Add(RelicTypeEnum.NECK, []);
@@ -38,6 +41,10 @@ public class CharacterBuilder : IPlugin
         PluginConstants.RelicSubAffix.Add(AvatarPropertyTypeEnum.StatusProbabilityBase, 10);
         PluginConstants.RelicSubAffix.Add(AvatarPropertyTypeEnum.StatusResistanceBase, 11);
         PluginConstants.RelicSubAffix.Add(AvatarPropertyTypeEnum.BreakDamageAddedRatioBase, 12);
+
+        PluginConstants.RelicMainAffix[RelicTypeEnum.HEAD][AvatarPropertyTypeEnum.HPDelta] = 1;
+
+        PluginConstants.RelicMainAffix[RelicTypeEnum.HAND][AvatarPropertyTypeEnum.AttackDelta] = 1;
 
         PluginConstants.RelicMainAffix[RelicTypeEnum.BODY][AvatarPropertyTypeEnum.HPAddedRatio] = 1;
         PluginConstants.RelicMainAffix[RelicTypeEnum.BODY][AvatarPropertyTypeEnum.AttackAddedRatio] = 2;
@@ -72,6 +79,6 @@ public class CharacterBuilder : IPlugin
 
     public void OnUnload()
     {
-        _logger.Info(I18NManager.Translate("CharacterBuilder.UnloadedCharacterBuilder"));
+        _logger.Info(I18NManager.Translate("DHConsoleCommands.UnloadedDHConsoleCommands"));
     }
 }

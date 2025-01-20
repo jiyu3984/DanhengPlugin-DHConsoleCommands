@@ -3,7 +3,7 @@ using EggLink.DanhengServer.Enums.Avatar;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace DanhengPlugin.CharacterBuilder.Data;
+namespace DanhengPlugin.DHConsoleCommands.Data;
 
 [ResourceEntity("AvatarRelicRecommend.json")]
 public class AvatarRelicRecommendExcel : ExcelResource

@@ -1,7 +1,7 @@
 ﻿using EggLink.DanhengServer.Enums.Avatar;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace DanhengPlugin.CharacterBuilder.Data;
+namespace DanhengPlugin.DHConsoleCommands.Data;
 
 public static class PluginConstants
 {

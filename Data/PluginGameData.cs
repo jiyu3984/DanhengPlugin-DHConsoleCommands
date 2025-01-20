@@ -1,4 +1,4 @@
-﻿namespace DanhengPlugin.CharacterBuilder.Data;
+﻿namespace DanhengPlugin.DHConsoleCommands.Data;
 
 public class PluginGameData
 {
