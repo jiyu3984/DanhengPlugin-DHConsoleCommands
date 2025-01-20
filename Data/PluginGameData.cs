@@ -1,4 +1,6 @@
-﻿namespace DanhengPlugin.DHConsoleCommands.Data;
+﻿using System.Collections.Generic;
+
+namespace DanhengPlugin.DHConsoleCommands.Data;
 
 public class PluginGameData
 {

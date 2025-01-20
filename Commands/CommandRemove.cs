@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using EggLink.DanhengServer.Command;
 using EggLink.DanhengServer.Command.Command;
 using EggLink.DanhengServer.GameServer.Server.Packet.Send.PlayerSync;
@@ -30,27 +31,7 @@ public class CommandRemove : ICommand
             }
         }
 
-        await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.RemoveRelicsSuccess"));
-        await arg.SendMsg(removedCount.ToString());
-    }
-
-    [CommandMethod("help")]
-    public async ValueTask RemoveHelp(CommandArg arg)
-    {
-        var player = arg.Target?.Player;
-        if (player == null)
-        {
-            await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.PlayerNotFound"));
-            return;
-        }
-
-        List<int> avatarIds = [];
-        foreach (var avatar in player.AvatarManager!.AvatarData.Avatars)
-        {
-            avatarIds.Add(avatar.AvatarId);
-        }
-        avatarIds.Sort();
-        await arg.SendMsg($@"All avatar ids: [{string.Join(", ", avatarIds)}]");
+        await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.RemoveRelicsSuccess") + $" {removedCount}");
     }
 
     [CommandDefault]
@@ -82,10 +63,12 @@ public class CommandRemove : ICommand
             await arg.SendMsg(I18NManager.Translate("Game.Command.Avatar.AvatarNotFound"));
             return;
         }
+
+        var path = avatar.GetCurPathInfo();
         // remove relics
         for (int i = 0; i < 6; i++)
         {
-            avatar.PathInfoes[avatarId].Relic.TryGetValue(i, out var itemId);
+            path.Relic.TryGetValue(i, out var itemId);
             if (itemId == 0) continue;
             var oldItem = player.InventoryManager!.Data.RelicItems.Find(x => x.UniqueId == itemId);
             if (oldItem != null)
@@ -95,9 +78,9 @@ public class CommandRemove : ICommand
             }
         }
         // remove light cone
-        if (avatar.PathInfoes[avatarId].EquipId != 0)
+        if (path.EquipId != 0)
         {
-            var oldItem = player.InventoryManager!.Data.EquipmentItems.Find(x => x.UniqueId == avatar.PathInfoes[avatarId].EquipId);
+            var oldItem = player.InventoryManager!.Data.EquipmentItems.Find(x => x.UniqueId == path.EquipId);
             if (oldItem != null)
             {
                 oldItem.EquipAvatar = 0;
@@ -105,8 +88,11 @@ public class CommandRemove : ICommand
             }
         }
 
-        avatar.PathInfoes.Remove(avatarId);
-        player.AvatarManager!.AvatarData.Avatars.Remove(avatar);
+        avatar.PathInfoes.Remove(path.PathId);
+        if (avatar.PathInfoes.Count == 0)
+        {
+            player.AvatarManager!.AvatarData.Avatars.Remove(avatar);
+        }
 
         await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.RemoveAvatarSuccess"));
     }

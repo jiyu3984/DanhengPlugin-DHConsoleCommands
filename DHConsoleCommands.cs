@@ -19,6 +19,7 @@ public class DHConsoleCommands : IPlugin
         CommandManager.Instance?.RegisterCommand(typeof(CommandBuild));
         CommandManager.Instance?.RegisterCommand(typeof(CommandRemove));
         CommandManager.Instance?.RegisterCommand(typeof(CommandGameText));
+        CommandManager.Instance?.RegisterCommand(typeof(CommandFetch));
         _logger.Info(I18NManager.Translate("DHConsoleCommands.LoadedDHConsoleCommands"));
         // load data
         ResourceManager.LoadSingleExcel<AvatarRelicRecommendExcel>(typeof(AvatarRelicRecommendExcel));
