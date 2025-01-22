@@ -75,7 +75,7 @@ public class CommandFetch : ICommand
             if (relicUniqueId == 0) continue;
             var relic = player.InventoryManager!.Data.RelicItems.Find(x => x.UniqueId == relicUniqueId);
             if (relic == null) continue;
-            var subAffixes = string.Join("|", relic.SubAffixes.Select(x => $"{getAffixName(i, false, x.Id)}:{x.Count - 1}+{x.Step}"));
+            var subAffixes = string.Join("|", relic.SubAffixes.Select(x => $"{getAffixName(i, false, x.Id)}-{x.Count - 1}+{x.Step}"));
             output.AppendLine($@"[Relic {i}] id: {relic.ItemId}, level: {relic.Level}, mainAffix: {getAffixName(i, true, relic.MainAffix)}, subAffixes: {subAffixes}");
         }
         await arg.SendMsg(output.ToString());
