@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Text;
 using DanhengPlugin.DHConsoleCommands.Data;
 using EggLink.DanhengServer.Command;
 using EggLink.DanhengServer.Command.Command;
@@ -69,6 +66,39 @@ public class CommandBuild : ICommand
         }
     }
 
+    [CommandMethod("0 recommend")]
+    public async ValueTask BuildRecommend(CommandArg arg)
+    {
+        var player = arg.Target?.Player;
+        if (player == null)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.PlayerNotFound"));
+            return;
+        }
+
+        if (arg.BasicArgs.Count == 0)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.InvalidArguments"));
+            return;
+        }
+
+        var id = arg.GetInt(0);
+        if (id == 0)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Avatar.AvatarNotFound"));
+            return;
+        }
+        // get avatar data
+        var avatar = player.AvatarManager!.GetAvatar(id);
+        if (avatar == null)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Avatar.AvatarNotFound"));
+            return;
+        }
+
+        await BuildAvatar(avatar, arg, true);
+    }
+
     [CommandDefault]
     public async ValueTask BuildTarget(CommandArg arg)
     {
@@ -102,7 +132,7 @@ public class CommandBuild : ICommand
         await BuildAvatar(avatar, arg);
     }
 
-    public async ValueTask BuildAvatar(AvatarInfo avatar, CommandArg arg)
+    public async ValueTask BuildAvatar(AvatarInfo avatar, CommandArg arg, bool dryRun = false)
     {
         // build avatar
         var player = arg.Target!.Player!;
@@ -117,6 +147,8 @@ public class CommandBuild : ICommand
             RelicTypeEnum.HEAD, RelicTypeEnum.HAND, RelicTypeEnum.BODY, RelicTypeEnum.FOOT,
             RelicTypeEnum.NECK, RelicTypeEnum.OBJECT
         ];
+
+        StringBuilder dryRunOutput = new();
 
         for (int i = 0; i < relicTypes.Count; i++)
         {
@@ -174,13 +206,27 @@ public class CommandBuild : ICommand
                 var subAffixExcel = GameData.RelicSubAffixData[5][relic.SubAffixes[index].Id];
                 relic.SubAffixes[index].IncreaseStep(subAffixExcel.StepNum);
             }
-            await logItem(arg, type, relic);
 
-            await player.InventoryManager.AddItem(relic, false);
-            await player.InventoryManager.EquipRelic(avatar.GetAvatarId(), relic.UniqueId, i + 1);
+            if (dryRun)
+            {
+                dryRunOutput.AppendLine($@"{type}: {getItemStr(relic)}");
+            }
+            else
+            {
+                await arg.SendMsg($@"Building {type}: /relic {getItemStr(relic)} l15 x1");
+                await player.InventoryManager.AddItem(relic, false);
+                await player.InventoryManager.EquipRelic(avatar.GetAvatarId(), relic.UniqueId, i + 1);
+            }
         }
 
-        await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.BuildSuccess"));
+        if (dryRun)
+        {
+            await arg.SendMsg(dryRunOutput.ToString());
+        }
+        else
+        {
+            await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.BuildSuccess"));
+        }
     }
 
     private static List<AvatarPropertyTypeEnum> FillAffixList(List<AvatarPropertyTypeEnum> subAffixList, AvatarPropertyTypeEnum mainAffix, out int numPriorityAffix)
@@ -234,13 +280,13 @@ public class CommandBuild : ICommand
         return subAffixList;
     }
 
-    private async ValueTask logItem(CommandArg arg, RelicTypeEnum type, ItemData item)
+    private string getItemStr(ItemData item)
     {
         string itemstr = $@"{item.ItemId} {item.MainAffix}";
         foreach (var sub in item.SubAffixes)
         {
             itemstr += $@" {sub.Id}:{sub.Count}";
         }
-        await arg.SendMsg($@"Building {type}: /relic {itemstr} l15 x1");
+        return itemstr;
     }
 }

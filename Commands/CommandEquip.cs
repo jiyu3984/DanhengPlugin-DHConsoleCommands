@@ -1,11 +1,6 @@
-using DanhengPlugin.DHConsoleCommands.Data;
 using EggLink.DanhengServer.Command;
 using EggLink.DanhengServer.Command.Command;
 using EggLink.DanhengServer.Data;
-using EggLink.DanhengServer.Database.Avatar;
-using EggLink.DanhengServer.Database.Inventory;
-using EggLink.DanhengServer.Enums.Avatar;
-using EggLink.DanhengServer.Enums.Item;
 using EggLink.DanhengServer.GameServer.Server.Packet.Send.PlayerSync;
 using EggLink.DanhengServer.Internationalization;
 
@@ -57,26 +52,8 @@ public class CommandEquip : ICommand
             return;
         }
 
-        var path = avatar.GetCurPathInfo();
-        if (path == null)
-        {
-            await arg.SendMsg(I18NManager.Translate("Game.Command.Avatar.AvatarNotFound"));
-            return;
-        }
-
-        if (path.EquipId != 0)
-        {
-            var oldItem = player.InventoryManager!.Data.EquipmentItems.Find(x => x.UniqueId == path.EquipId);
-            if (oldItem != null)
-            {
-                oldItem.EquipAvatar = 0;
-            }
-        }
-        path.EquipId = itemData.UniqueId;
-        itemData.EquipAvatar = avatarId;
-
+        await player.InventoryManager!.EquipAvatar(avatarId, itemData.UniqueId);
         await player.SendPacket(new PacketPlayerSyncScNotify(itemData));
-
         await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.EquipSuccess"));
     }
 
@@ -130,7 +107,8 @@ public class CommandEquip : ICommand
                 await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.InvalidArguments"));
                 return;
             }
-            subAffixes.Add((subId, subLevel));
+            // input is upgrade level, so total level is upgrade level + 1
+            subAffixes.Add((subId, subLevel + 1));
         }
         (var ret, var itemData) = await player.InventoryManager!.HandleRelic(
             relicId, ++player.InventoryManager!.Data.NextUniqueId,
@@ -154,18 +132,7 @@ public class CommandEquip : ICommand
             await arg.SendMsg(I18NManager.Translate("Game.Command.Relic.RelicNotFound"));
             return;
         }
-
-        var path = avatar.GetCurPathInfo();
-        if (path.Relic.TryGetValue(slotId, out var oldItemId) && oldItemId != 0)
-        {
-            var oldItem = player.InventoryManager!.Data.RelicItems.Find(x => x.UniqueId == oldItemId);
-            if (oldItem != null)
-            {
-                oldItem.EquipAvatar = 0;
-            }
-        }
-        path.Relic[slotId] = itemData.UniqueId;
-        itemData.EquipAvatar = avatarId;
+        await player.InventoryManager!.EquipRelic(avatarId, itemData.UniqueId, slotId);
         await player.SendPacket(new PacketPlayerSyncScNotify(itemData));
         await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.EquipSuccess"));
     }

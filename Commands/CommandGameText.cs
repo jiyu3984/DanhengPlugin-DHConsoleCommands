@@ -1,7 +1,4 @@
 using System.Text;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.IO;
 using EggLink.DanhengServer.Command;
 using EggLink.DanhengServer.Command.Command;
 using EggLink.DanhengServer.Data;
@@ -98,6 +95,17 @@ public class CommandGameText : ICommand
         {
             var name = textMap.TryGetValue(mission.TargetText.Hash, out var value) ? value : $"[{mission.TargetText.Hash}]";
             output.AppendLine(mission.SubMissionID + ": " + name);
+        }
+        await arg.SendMsg(output.ToString());
+    }
+
+    [CommandMethod("0 relic")]
+    public async ValueTask getRelicTypes(CommandArg arg)
+    {
+        StringBuilder output = new();
+        foreach (var relic in GameData.RelicConfigData.Values)
+        {
+            output.AppendLine(relic.ID + ": " + (int)relic.Type);
         }
         await arg.SendMsg(output.ToString());
     }
