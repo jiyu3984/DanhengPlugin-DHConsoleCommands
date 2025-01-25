@@ -167,6 +167,12 @@
     <Reference Include="System.Security.Permissions">
       <HintPath>Libs\System.Security.Permissions.dll</HintPath>
     </Reference>
+    <Reference Include="System.Text.Encodings.Web">
+      <HintPath>Libs\System.Text.Encodings.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Json">
+      <HintPath>Libs\System.Text.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Extensions">
       <HintPath>Libs\System.Windows.Extensions.dll</HintPath>
     </Reference>

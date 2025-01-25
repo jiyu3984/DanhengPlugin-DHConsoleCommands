@@ -1,0 +1,173 @@
+using DanhengPlugin.DHConsoleCommands.Data;
+using EggLink.DanhengServer.Command;
+using EggLink.DanhengServer.Command.Command;
+using EggLink.DanhengServer.Data;
+using EggLink.DanhengServer.Database.Avatar;
+using EggLink.DanhengServer.Database.Inventory;
+using EggLink.DanhengServer.Enums.Avatar;
+using EggLink.DanhengServer.Enums.Item;
+using EggLink.DanhengServer.GameServer.Server.Packet.Send.PlayerSync;
+using EggLink.DanhengServer.Internationalization;
+
+namespace DanhengPlugin.DHConsoleCommands.Commands;
+
+[CommandInfo("equip", "Equip a character", "Usage: /equip item <avatarId> <itemId> l<level> r<rank> or /equip relic <avatarId> <relicId> <mainAffixId> <subAffixId*4>:<level*4>")]
+public class CommandEquip : ICommand
+{
+    [CommandMethod("0 item")]
+    public async ValueTask equipItem(CommandArg arg)
+    {
+        var player = arg.Target?.Player;
+        if (player == null)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.PlayerNotFound"));
+            return;
+        }
+
+        if (arg.BasicArgs.Count < 2)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.InvalidArguments"));
+            return;
+        }
+
+        int avatarId = arg.GetInt(0);
+        int itemId = arg.GetInt(1);
+
+        var avatar = player.AvatarManager!.GetAvatar(avatarId);
+        if (avatar == null)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Avatar.AvatarNotFound"));
+            return;
+        }
+
+        arg.CharacterArgs.TryGetValue("l", out var levelStr);
+        arg.CharacterArgs.TryGetValue("r", out var rankStr);
+        levelStr ??= "1";
+        rankStr ??= "1";
+        if (!int.TryParse(levelStr, out var level) || !int.TryParse(rankStr, out var rank))
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.InvalidArguments"));
+            return;
+        }
+
+        var itemData = await player.InventoryManager!.PutItem(itemId, 1, rank: rank, level: level);
+        if (itemData == null)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Give.ItemNotFound"));
+            return;
+        }
+
+        var path = avatar.GetCurPathInfo();
+        if (path == null)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Avatar.AvatarNotFound"));
+            return;
+        }
+
+        if (path.EquipId != 0)
+        {
+            var oldItem = player.InventoryManager!.Data.EquipmentItems.Find(x => x.UniqueId == path.EquipId);
+            if (oldItem != null)
+            {
+                oldItem.EquipAvatar = 0;
+            }
+        }
+        path.EquipId = itemData.UniqueId;
+        itemData.EquipAvatar = avatarId;
+
+        await player.SendPacket(new PacketPlayerSyncScNotify(itemData));
+
+        await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.EquipSuccess"));
+    }
+
+    [CommandMethod("0 relic")]
+    public async ValueTask equipRelic(CommandArg arg)
+    {
+        var player = arg.Target?.Player;
+        if (player == null)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.PlayerNotFound"));
+            return;
+        }
+
+        if (arg.BasicArgs.Count < 2)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.InvalidArguments"));
+            return;
+        }
+
+        int avatarId = arg.GetInt(0);
+        int relicId = arg.GetInt(1);
+        var avatar = player.AvatarManager!.GetAvatar(avatarId);
+        if (avatar == null)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Avatar.AvatarNotFound"));
+            return;
+        }
+        GameData.RelicConfigData.TryGetValue(relicId, out var relicConfig);
+        if (relicConfig == null)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Relic.RelicNotFound"));
+            return;
+        }
+        int slotId = (int)relicConfig.Type;
+
+        var startIndex = 2;
+        var mainAffixId = 0;
+        if (!arg.BasicArgs[startIndex].Contains(':'))
+        {
+            mainAffixId = int.Parse(arg.BasicArgs[startIndex]);
+            startIndex++;
+        }
+
+        var subAffixes = new List<(int, int)>();
+        for (var ii = startIndex; ii < arg.BasicArgs.Count; ii++)
+        {
+            var subAffix = arg.BasicArgs[ii].Split(':');
+            if (subAffix.Length != 2 || !int.TryParse(subAffix[0], out var subId) ||
+                !int.TryParse(subAffix[1], out var subLevel))
+            {
+                await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.InvalidArguments"));
+                return;
+            }
+            subAffixes.Add((subId, subLevel));
+        }
+        (var ret, var itemData) = await player.InventoryManager!.HandleRelic(
+            relicId, ++player.InventoryManager!.Data.NextUniqueId,
+            15, mainAffixId, subAffixes);
+
+        switch (ret)
+        {
+            case 1:
+                await arg.SendMsg(I18NManager.Translate("Game.Command.Relic.RelicNotFound"));
+                return;
+            case 2:
+                await arg.SendMsg(I18NManager.Translate("Game.Command.Relic.InvalidMainAffixId"));
+                return;
+            case 3:
+                await arg.SendMsg(I18NManager.Translate("Game.Command.Relic.InvalidSubAffixId"));
+                return;
+        }
+
+        if (itemData == null)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Relic.RelicNotFound"));
+            return;
+        }
+
+        var path = avatar.GetCurPathInfo();
+        if (path.Relic.TryGetValue(slotId, out var oldItemId) && oldItemId != 0)
+        {
+            var oldItem = player.InventoryManager!.Data.RelicItems.Find(x => x.UniqueId == oldItemId);
+            if (oldItem != null)
+            {
+                oldItem.EquipAvatar = 0;
+            }
+        }
+        path.Relic[slotId] = itemData.UniqueId;
+        itemData.EquipAvatar = avatarId;
+        await player.SendPacket(new PacketPlayerSyncScNotify(itemData));
+        await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.EquipSuccess"));
+    }
+
+}
