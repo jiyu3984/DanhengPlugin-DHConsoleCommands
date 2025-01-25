@@ -209,7 +209,7 @@ public class CommandBuild : ICommand
 
             if (dryRun)
             {
-                dryRunOutput.AppendLine($@"{type}: {getItemStr(relic)}");
+                dryRunOutput.AppendLine($@"[{(int)type}] {getItemStr(relic)}");
             }
             else
             {
