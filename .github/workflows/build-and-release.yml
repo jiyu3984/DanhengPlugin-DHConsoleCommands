@@ -2,6 +2,7 @@ name: Build and Attach to Release
 
 on:
   release:
+    types: [published]
 
 permissions:
   contents: write
