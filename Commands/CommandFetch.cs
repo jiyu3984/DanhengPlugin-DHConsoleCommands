@@ -1,17 +1,15 @@
 using System.Text;
-using System.Threading.Tasks;
 using EggLink.DanhengServer.Command;
 using EggLink.DanhengServer.Command.Command;
 using EggLink.DanhengServer.Internationalization;
 using DanhengPlugin.DHConsoleCommands.Data;
-using System.Linq;
-using System.Collections.Generic;
 using EggLink.DanhengServer.Enums.Avatar;
+using EggLink.DanhengServer.Proto;
 
 
 namespace DanhengPlugin.DHConsoleCommands.Commands;
 
-[CommandInfo("fetch", "fetch data about a player", "Usage: /fetch <owned/avatar/inventory> ...")]
+[CommandInfo("fetch", "fetch data about a player", "Usage: /fetch <owned/avatar/inventory/player> ...")]
 public class CommandFetch : ICommand
 {
 
@@ -32,6 +30,19 @@ public class CommandFetch : ICommand
         }
         avatarIds.Sort();
         await arg.SendMsg($@"{string.Join(", ", avatarIds)}");
+    }
+
+    [CommandMethod("0 player")]
+    public async ValueTask fetchPlayer(CommandArg arg)
+    {
+        var player = arg.Target?.Player;
+        if (player == null)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.PlayerNotFound"));
+            return;
+        }
+
+        await arg.SendMsg($@"level: {player.Data.Level}, gender: {(player.Data.CurrentGender == Gender.Man ? 1 : 2)}");
     }
 
     [CommandMethod("0 avatar")]
