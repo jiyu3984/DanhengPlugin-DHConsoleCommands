@@ -45,7 +45,7 @@ public class CommandEquip : ICommand
             return;
         }
 
-        var itemData = await player.InventoryManager!.AddItem(itemId, 1, rank: rank, level: level);
+        var itemData = await player.InventoryManager!.AddItem(itemId, 1, rank: rank, level: level, sync: false);
         if (itemData == null)
         {
             await arg.SendMsg(I18NManager.Translate("Game.Command.Give.ItemNotFound"));

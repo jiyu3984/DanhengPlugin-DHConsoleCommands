@@ -9,7 +9,7 @@ using EggLink.DanhengServer.Util;
 
 namespace DanhengPlugin.DHConsoleCommands;
 
-[PluginInfo("DHConsoleCommands", "DHConsole is ready to use commands", "1.0")]
+[PluginInfo("DHConsoleCommands", "DHConsole is ready to use commands", "0.1.2")]
 public class DHConsoleCommands : IPlugin
 {
     private readonly Logger _logger = new("DHConsoleCommands");
@@ -21,6 +21,7 @@ public class DHConsoleCommands : IPlugin
         CommandManager.Instance?.RegisterCommand(typeof(CommandGameText));
         CommandManager.Instance?.RegisterCommand(typeof(CommandFetch));
         CommandManager.Instance?.RegisterCommand(typeof(CommandEquip));
+        CommandManager.Instance?.RegisterCommand(typeof(CommandDebug));
         _logger.Info(I18NManager.Translate("DHConsoleCommands.LoadedDHConsoleCommands"));
         // load data
         ResourceManager.LoadSingleExcel<AvatarRelicRecommendExcel>(typeof(AvatarRelicRecommendExcel));

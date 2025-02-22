@@ -19,5 +19,6 @@ public class PluginLanguage
     public string BuildSuccess => "构建成功！";
     public string RemoveAvatarSuccess => "成功移除角色";
     public string RemoveRelicsSuccess => "成功移除多余遗器";
+    public string RemoveEquipmentSuccess => "成功移除多余装备";
     public string EquipSuccess => "成功装备";
 }

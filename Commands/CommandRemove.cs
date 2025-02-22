@@ -5,10 +5,10 @@ using EggLink.DanhengServer.Internationalization;
 
 namespace DanhengPlugin.DHConsoleCommands.Commands;
 
-[CommandInfo("remove", "remove a character or unequipped relics", "Usage: /remove <avatarId/relics>")]
+[CommandInfo("remove", "remove a character or unequipped relics", "Usage: /remove <avatarId/relics/equipment>")]
 public class CommandRemove : ICommand
 {
-    [CommandMethod("relics")]
+    [CommandMethod("0 relics")]
     public async ValueTask RemoveRelics(CommandArg arg)
     {
         var player = arg.Target?.Player;
@@ -18,19 +18,42 @@ public class CommandRemove : ICommand
             return;
         }
 
-        int removedCount = 0;
+        List<string> removedItems = [];
         foreach (var item in player.InventoryManager!.Data.RelicItems)
         {
             if (item.EquipAvatar == 0)
             {
-                player.InventoryManager.Data.RelicItems.Remove(item);
-                item.Count = 0;
-                removedCount++;
-                await player.SendPacket(new PacketPlayerSyncScNotify(item));
+                item.Discarded = true;
+                var itemResult = await player.InventoryManager.RemoveItem(item.ItemId, item.Count, item.UniqueId, false);
+                removedItems.Add(@$"{item.UniqueId}: {item.ItemId}x{item.Count} - {(itemResult != null ? "success" : "failed")}");
             }
         }
 
-        await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.RemoveRelicsSuccess") + $" {removedCount}");
+        await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.RemoveRelicsSuccess") + $"\n{string.Join("\n", removedItems)}");
+    }
+
+    [CommandMethod("0 equipment")]
+    public async ValueTask RemoveEquipment(CommandArg arg)
+    {
+        var player = arg.Target?.Player;
+        if (player == null)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.PlayerNotFound"));
+            return;
+        }
+
+        List<string> removedItems = [];
+        foreach (var item in player.InventoryManager!.Data.EquipmentItems)
+        {
+            if (item.EquipAvatar == 0)
+            {
+                item.Discarded = true;
+                var itemResult = await player.InventoryManager.RemoveItem(item.ItemId, item.Count, item.UniqueId, false);
+                removedItems.Add(@$"{item.UniqueId}: {item.ItemId}x{item.Count} - {(itemResult != null ? "success" : "failed")}");
+            }
+        }
+
+        await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.RemoveEquipmentSuccess") + $"\n{string.Join("\n", removedItems)}");
     }
 
     [CommandDefault]
