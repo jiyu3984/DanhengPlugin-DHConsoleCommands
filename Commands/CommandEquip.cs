@@ -50,8 +50,11 @@ public class CommandEquip : ICommand
         // if the item is already equipped, just update the level and rank
         if (curItemData != null && curItemData.ItemId == itemId)
         {
+            int promotion = GameData.GetMinPromotionForLevel(level);
             curItemData.Level = level;
+            curItemData.Promotion = promotion;
             curItemData.Rank = rank;
+            curItemData.Exp = 0;
             await player.SendPacket(new PacketPlayerSyncScNotify(avatar, curItemData));
             return;
         }
