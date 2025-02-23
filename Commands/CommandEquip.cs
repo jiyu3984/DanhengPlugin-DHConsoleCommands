@@ -46,15 +46,28 @@ public class CommandEquip : ICommand
             return;
         }
 
-        var itemData = await player.InventoryManager!.AddItem(itemId, 1, rank: rank, level: level, sync: false);
-        if (itemData == null)
+        var curItemData = player.InventoryManager!.Data.EquipmentItems.Find(x => x.ItemId == avatar.GetCurPathInfo().EquipId);
+        // if the item is already equipped, just update the level and rank
+        if (curItemData != null && curItemData.ItemId == itemId)
         {
-            await arg.SendMsg(I18NManager.Translate("Game.Command.Give.ItemNotFound"));
+            curItemData.Level = level;
+            curItemData.Rank = rank;
+            await player.SendPacket(new PacketPlayerSyncScNotify(avatar, curItemData));
             return;
         }
+        else // otherwise, add the item to the inventory
+        {
+            var itemData = await player.InventoryManager!.AddItem(itemId, 1, rank: rank, level: level, sync: false);
+            if (itemData == null)
+            {
+                await arg.SendMsg(I18NManager.Translate("Game.Command.Give.ItemNotFound"));
+                return;
+            }
 
-        await player.InventoryManager!.EquipAvatar(avatarId, itemData.UniqueId);
-        await player.SendPacket(new BasePacket(CmdIds.DressAvatarScRsp));
+            await player.InventoryManager!.EquipAvatar(avatarId, itemData.UniqueId);
+            await player.SendPacket(new BasePacket(CmdIds.DressAvatarScRsp));
+        }
+
         await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.EquipSuccess"));
     }
 
