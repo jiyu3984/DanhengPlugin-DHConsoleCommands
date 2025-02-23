@@ -45,7 +45,7 @@ public class CommandFetch : ICommand
         await arg.SendMsg($@"level: {player.Data.Level}, gender: {(player.Data.CurrentGender == Gender.Man ? 1 : 2)}");
     }
 
-    [CommandMethod("0 avatar")]
+    [CommandMethod("avatar")]
     public async ValueTask fetchAvatar(CommandArg arg)
     {
         var player = arg.Target?.Player;

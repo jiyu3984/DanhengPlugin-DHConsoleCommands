@@ -11,36 +11,9 @@ using EggLink.DanhengServer.Internationalization;
 
 namespace DanhengPlugin.DHConsoleCommands.Commands;
 
-[CommandInfo("build", "Build a character", "Usage: /build <cur/[id]>")]
+[CommandInfo("build", "Build a character", "Usage: /build (recommend) <avatarId/all>")]
 public class CommandBuild : ICommand
 {
-    [CommandMethod("0 cur")]
-    public async ValueTask BuildCur(CommandArg arg)
-    {
-        var player = arg.Target?.Player;
-        if (player == null)
-        {
-            await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.PlayerNotFound"));
-            return;
-        }
-
-        // get current avatar data
-        var id = player.LineupManager?.GetCurLineup()?.LeaderAvatarId ?? 0;
-        if (id == 0)
-        {
-            await arg.SendMsg(I18NManager.Translate("Game.Command.Avatar.AvatarNotFound"));
-            return;
-        }
-        // get avatar data
-        var avatar = player.AvatarManager!.GetAvatar(id);
-        if (avatar == null)
-        {
-            await arg.SendMsg(I18NManager.Translate("Game.Command.Avatar.AvatarNotFound"));
-            return;
-        }
-
-        await BuildAvatar(avatar, arg);
-    }
 
     [CommandMethod("0 all")]
     public async ValueTask BuildAll(CommandArg arg)
