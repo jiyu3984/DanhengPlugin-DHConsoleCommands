@@ -46,7 +46,7 @@ public class CommandEquip : ICommand
             return;
         }
 
-        var curItemData = player.InventoryManager!.Data.EquipmentItems.Find(x => x.ItemId == avatar.GetCurPathInfo().EquipId);
+        var curItemData = player.InventoryManager!.Data.EquipmentItems.Find(x => x.UniqueId == avatar.GetCurPathInfo().EquipId);
         // if the item is already equipped, just update the level and rank
         if (curItemData != null && curItemData.ItemId == itemId)
         {
