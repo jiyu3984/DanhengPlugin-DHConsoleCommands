@@ -2,6 +2,7 @@ using EggLink.DanhengServer.Command;
 using EggLink.DanhengServer.Command.Command;
 using EggLink.DanhengServer.GameServer.Server.Packet.Send.PlayerSync;
 using EggLink.DanhengServer.Internationalization;
+using EggLink.DanhengServer.Kcp;
 
 namespace DanhengPlugin.DHConsoleCommands.Commands;
 
@@ -25,6 +26,7 @@ public class CommandRemove : ICommand
             {
                 item.Discarded = true;
                 var itemResult = await player.InventoryManager.RemoveItem(item.ItemId, item.Count, item.UniqueId, false);
+                await player.SendPacket(new BasePacket(CmdIds.DiscardRelicScRsp));
                 removedItems.Add(@$"{item.UniqueId}: {item.ItemId}x{item.Count} - {(itemResult != null ? "success" : "failed")}");
             }
         }
@@ -49,6 +51,7 @@ public class CommandRemove : ICommand
             {
                 item.Discarded = true;
                 var itemResult = await player.InventoryManager.RemoveItem(item.ItemId, item.Count, item.UniqueId, false);
+                await player.SendPacket(new BasePacket(CmdIds.DestroyItemScRsp));
                 removedItems.Add(@$"{item.UniqueId}: {item.ItemId}x{item.Count} - {(itemResult != null ? "success" : "failed")}");
             }
         }

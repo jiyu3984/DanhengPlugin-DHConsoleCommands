@@ -3,6 +3,7 @@ using EggLink.DanhengServer.Command.Command;
 using EggLink.DanhengServer.Data;
 using EggLink.DanhengServer.GameServer.Server.Packet.Send.PlayerSync;
 using EggLink.DanhengServer.Internationalization;
+using EggLink.DanhengServer.Kcp;
 
 namespace DanhengPlugin.DHConsoleCommands.Commands;
 
@@ -53,7 +54,7 @@ public class CommandEquip : ICommand
         }
 
         await player.InventoryManager!.EquipAvatar(avatarId, itemData.UniqueId);
-        await player.SendPacket(new PacketPlayerSyncScNotify(itemData));
+        await player.SendPacket(new BasePacket(CmdIds.DressAvatarScRsp));
         await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.EquipSuccess"));
     }
 
@@ -133,7 +134,7 @@ public class CommandEquip : ICommand
             return;
         }
         await player.InventoryManager!.EquipRelic(avatarId, itemData.UniqueId, slotId);
-        await player.SendPacket(new PacketPlayerSyncScNotify(itemData));
+        await player.SendPacket(new BasePacket(CmdIds.DressRelicAvatarScRsp));
         await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.EquipSuccess"));
     }
 
