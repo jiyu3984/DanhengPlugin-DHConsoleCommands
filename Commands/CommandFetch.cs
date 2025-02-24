@@ -5,6 +5,8 @@ using EggLink.DanhengServer.Internationalization;
 using DanhengPlugin.DHConsoleCommands.Data;
 using EggLink.DanhengServer.Enums.Avatar;
 using EggLink.DanhengServer.Proto;
+using EggLink.DanhengServer.GameServer.Game.Scene.Entity;
+using EggLink.DanhengServer.Util;
 
 
 namespace DanhengPlugin.DHConsoleCommands.Commands;
@@ -14,7 +16,7 @@ public class CommandFetch : ICommand
 {
 
     [CommandMethod("0 owned")]
-    public async ValueTask fetchOwnedCharacters(CommandArg arg)
+    public async ValueTask FetchOwnedCharacters(CommandArg arg)
     {
         var player = arg.Target?.Player;
         if (player == null)
@@ -33,7 +35,7 @@ public class CommandFetch : ICommand
     }
 
     [CommandMethod("0 player")]
-    public async ValueTask fetchPlayer(CommandArg arg)
+    public async ValueTask FetchPlayer(CommandArg arg)
     {
         var player = arg.Target?.Player;
         if (player == null)
@@ -46,7 +48,7 @@ public class CommandFetch : ICommand
     }
 
     [CommandMethod("avatar")]
-    public async ValueTask fetchAvatar(CommandArg arg)
+    public async ValueTask FetchAvatar(CommandArg arg)
     {
         var player = arg.Target?.Player;
         if (player == null)
@@ -86,13 +88,13 @@ public class CommandFetch : ICommand
             if (relicUniqueId == 0) continue;
             var relic = player.InventoryManager!.Data.RelicItems.Find(x => x.UniqueId == relicUniqueId);
             if (relic == null) continue;
-            var subAffixes = string.Join("|", relic.SubAffixes.Select(x => $"{getAffixName(i, false, x.Id)}-{x.Count - 1}+{x.Step}"));
-            output.AppendLine($@"[Relic {i}] id: {relic.ItemId}, level: {relic.Level}, mainAffix: {getAffixName(i, true, relic.MainAffix)}, subAffixes: {subAffixes}");
+            var subAffixes = string.Join("|", relic.SubAffixes.Select(x => $"{GetAffixName(i, false, x.Id)}-{x.Count - 1}+{x.Step}"));
+            output.AppendLine($@"[Relic {i}] id: {relic.ItemId}, level: {relic.Level}, mainAffix: {GetAffixName(i, true, relic.MainAffix)}, subAffixes: {subAffixes}");
         }
         await arg.SendMsg(output.ToString());
     }
 
-    private static string getAffixName(int relicPosition, bool isMainAffix, int affixId)
+    private static string GetAffixName(int relicPosition, bool isMainAffix, int affixId)
     {
         RelicTypeEnum relicType = (RelicTypeEnum)relicPosition;
         if (isMainAffix)
@@ -103,7 +105,7 @@ public class CommandFetch : ICommand
     }
 
     [CommandMethod("0 inventory")]
-    public async ValueTask fetchInventory(CommandArg arg)
+    public async ValueTask FetchInventory(CommandArg arg)
     {
         var player = arg.Target?.Player;
         if (player == null)
@@ -115,4 +117,74 @@ public class CommandFetch : ICommand
         await arg.SendMsg($@"{string.Join("\n", [.. player.InventoryManager!.Data.MaterialItems.Select(x => $"{x.ItemId}: {x.Count}")])}");
     }
 
+    [CommandMethod("0 scene")]
+    public async ValueTask FetchScene(CommandArg arg)
+    {
+        var player = arg.Target?.Player;
+        if (player == null)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.PlayerNotFound"));
+            return;
+        }
+        var scene = player.SceneInstance;
+        if (scene == null)
+        {
+            await arg.SendMsg(I18NManager.Translate("Game.Command.Notice.SceneNotFound"));
+            return;
+        }
+        var playerPos = player.Data.Pos;
+        if (playerPos == null)
+        {
+            await arg.SendMsg("Player position not found");
+            return;
+        }
+        Dictionary<string, long> output = new Dictionary<string, long>();
+
+        foreach (var entity in scene.Entities.Values)
+        {
+            if (entity is EntityProp prop)
+            {
+                try
+                {
+                    if (prop.Excel.IsHpRecover || prop.Excel.IsMpRecover || prop.PropInfo.AnchorID > 0 || prop.PropInfo.EventID > 0)
+                    {
+                        continue;
+                    }
+                    long distance = GetDistance(playerPos, prop.Position);
+                    string excel = prop.Excel.IsDoor ? "door" :
+                            prop.PropInfo.ChestID > 0 ? "chest" :
+                            prop.PropInfo.CocoonID > 0 ? "cocoon" :
+                            prop.PropInfo.FarmElementID > 0 ? "farmelement" :
+                            "other";
+
+                    string type = prop.Excel.PropType.ToString().Replace("PROP_", "");
+
+                    string states = string.Join(",", prop.Excel.PropStateList.Select(x => $"{x}:{(int)x}"));
+
+                    output.Add($"{entity.GroupID}-{prop.PropInfo.ID}[{distance}]: {excel} {type} {prop.Excel.ID} {prop.State}:{(int)prop.State} ({states})", distance);
+                }
+                catch (Exception ex)
+                {
+                    output.Add($"Error processing entity {prop.PropInfo.ID}: {ex.Message}", long.MinValue);
+                }
+            }
+        }
+        string sortedOutput = string.Join("\n", output.OrderBy(x => x.Value).Select(x => x.Key));
+        await arg.SendMsg($@"{sortedOutput}");
+    }
+
+    private static long GetDistance(Position pos1, Position pos2)
+    {
+        try
+        {
+            double x = (double)pos1.X - pos2.X;
+            double y = (double)pos1.Y - pos2.Y;
+            double z = (double)pos1.Z - pos2.Z;
+            return Convert.ToInt64(Math.Sqrt(x * x + y * y + z * z));
+        }
+        catch (OverflowException)
+        {
+            return long.MaxValue;
+        }
+    }
 }

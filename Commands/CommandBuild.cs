@@ -182,11 +182,11 @@ public class CommandBuild : ICommand
 
             if (dryRun)
             {
-                dryRunOutput.AppendLine($@"[{(int)type}] {getItemStr(relic)}");
+                dryRunOutput.AppendLine($@"[{(int)type}] {GetItemStr(relic)}");
             }
             else
             {
-                await arg.SendMsg($@"Building {type}: /relic {getItemStr(relic)} l15 x1");
+                await arg.SendMsg($@"Building {type}: /relic {GetItemStr(relic)} l15 x1");
                 await player.InventoryManager.AddItem(relic, false);
                 await player.InventoryManager.EquipRelic(avatar.GetAvatarId(), relic.UniqueId, i + 1);
             }
@@ -253,7 +253,7 @@ public class CommandBuild : ICommand
         return subAffixList;
     }
 
-    private string getItemStr(ItemData item)
+    private string GetItemStr(ItemData item)
     {
         string itemstr = $@"{item.ItemId} {item.MainAffix}";
         foreach (var sub in item.SubAffixes)

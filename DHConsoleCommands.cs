@@ -9,7 +9,7 @@ using EggLink.DanhengServer.Util;
 
 namespace DanhengPlugin.DHConsoleCommands;
 
-[PluginInfo("DHConsoleCommands", "DHConsole is ready to use commands", "0.1.2")]
+[PluginInfo("DHConsoleCommands", "DHConsole is ready to use commands", "1.1.0")]
 public class DHConsoleCommands : IPlugin
 {
     private readonly Logger _logger = new("DHConsoleCommands");

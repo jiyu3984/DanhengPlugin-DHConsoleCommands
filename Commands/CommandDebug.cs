@@ -14,7 +14,7 @@ public class CommandDebug : ICommand
 {
 
     [CommandMethod("0 avataritem")]
-    public async ValueTask debugAvatarItem(CommandArg arg)
+    public async ValueTask DebugAvatarItem(CommandArg arg)
     {
         var player = arg.Target?.Player;
         if (player == null)
@@ -33,7 +33,7 @@ public class CommandDebug : ICommand
     }
 
     [CommandMethod("0 avatarrelic")]
-    public async ValueTask debugAvatarRelic(CommandArg arg)
+    public async ValueTask DebugAvatarRelic(CommandArg arg)
     {
         var player = arg.Target?.Player;
         if (player == null)
@@ -57,7 +57,7 @@ public class CommandDebug : ICommand
     }
 
     [CommandMethod("0 item")]
-    public async ValueTask debugItem(CommandArg arg)
+    public async ValueTask DebugItem(CommandArg arg)
     {
         var player = arg.Target?.Player;
         if (player == null)
@@ -76,7 +76,7 @@ public class CommandDebug : ICommand
     }
 
     [CommandMethod("0 relic")]
-    public async ValueTask debugRelic(CommandArg arg)
+    public async ValueTask DebugRelic(CommandArg arg)
     {
         var player = arg.Target?.Player;
         if (player == null)

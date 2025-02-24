@@ -10,21 +10,22 @@ Then place it in the `Plugins` folder in your Danheng server directory.
 ## Commands
 
 - build (adapted from [CharacterBuilder](https://github.com/EggLinks/DanhengPlugin-CharacterBuilder))
-  - `build recommend` build recommended relics for current character
-  - `build all` build all characters (not used in console)
-  - `build <avatarId>` build specified character (not used in console)
+  - `build recommend <avatarId>` recommended relics for a character without making changes
+  - `build all` build all characters (unused in console)
+  - `build <avatarId>` build specified character (unused in console)
 - equip
   - `equip item <avatarId> <itemId> l<level> r<rank>` equip item to character
   - `equip relic <avatarId> <relicId> <mainAffixId> <subAffixId*4>:<level*4>` equip relic to character
 - remove (adapted from [Clean](https://github.com/AfricanCh/DanhengPlugin-Clean))
   - `remove relics` remove all unequipped relics
   - `remove equipment` remove all unequipped equipment
-  - `remove <avatarId>` remove specified avatar (not used in console)
+  - `remove avatar <avatarId>` remove specified character, then kick you back to login screen (unused in console)
 - fetch
   - `fetch owned` show all owned character ids
   - `fetch avatar <avatarId>` show character info
   - `fetch inventory` show all items
   - `fetch player` show player info
+  - `fetch scene` show props in the current scene
 - gametext
   - `gametext avatar #<language>` return character id to translation for certain language
   - `gametext item #<language>` return item id to translation for certain language

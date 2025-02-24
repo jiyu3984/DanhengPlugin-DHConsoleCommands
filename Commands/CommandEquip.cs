@@ -11,7 +11,7 @@ namespace DanhengPlugin.DHConsoleCommands.Commands;
 public class CommandEquip : ICommand
 {
     [CommandMethod("0 item")]
-    public async ValueTask equipItem(CommandArg arg)
+    public async ValueTask EquipItem(CommandArg arg)
     {
         var player = arg.Target?.Player;
         if (player == null)
@@ -75,7 +75,7 @@ public class CommandEquip : ICommand
     }
 
     [CommandMethod("0 relic")]
-    public async ValueTask equipRelic(CommandArg arg)
+    public async ValueTask EquipRelic(CommandArg arg)
     {
         var player = arg.Target?.Player;
         if (player == null)

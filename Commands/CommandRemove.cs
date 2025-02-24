@@ -1,13 +1,15 @@
 using EggLink.DanhengServer.Command;
 using EggLink.DanhengServer.Command.Command;
+using EggLink.DanhengServer.Database;
 using EggLink.DanhengServer.Database.Inventory;
+using EggLink.DanhengServer.GameServer.Server.Packet.Send.Player;
 using EggLink.DanhengServer.GameServer.Server.Packet.Send.PlayerSync;
 using EggLink.DanhengServer.Internationalization;
 using EggLink.DanhengServer.Kcp;
 
 namespace DanhengPlugin.DHConsoleCommands.Commands;
 
-[CommandInfo("remove", "remove a character or unequipped relics", "Usage: /remove <avatarId/relics/equipment>")]
+[CommandInfo("remove", "remove a character or unequipped relics", "Usage: /remove <avatar/relics/equipment> <avatarId>")]
 public class CommandRemove : ICommand
 {
     [CommandMethod("0 relics")]
@@ -46,7 +48,7 @@ public class CommandRemove : ICommand
         await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.RemoveEquipmentSuccess") + $"\n{output}");
     }
 
-    [CommandDefault]
+    [CommandMethod("0 avatar")]
     public async ValueTask RemoveAvatar(CommandArg arg)
     {
         var player = arg.Target?.Player;
@@ -76,37 +78,37 @@ public class CommandRemove : ICommand
             return;
         }
 
-        var path = avatar.GetCurPathInfo();
-        // remove relics
-        for (int i = 0; i < 6; i++)
+        List<ItemData> itemsToUnequip = [];
+        foreach (var pathInfo in avatar.PathInfoes.Values)
         {
-            path.Relic.TryGetValue(i, out var itemId);
-            if (itemId == 0) continue;
-            var oldItem = player.InventoryManager!.Data.RelicItems.Find(x => x.UniqueId == itemId);
-            if (oldItem != null)
+            foreach (var relic in pathInfo.Relic)
             {
-                oldItem.EquipAvatar = 0;
-                await player.SendPacket(new PacketPlayerSyncScNotify(oldItem));
+                var item = player.InventoryManager!.Data.RelicItems.Find(x => x.UniqueId == relic.Value);
+                if (item != null)
+                {
+                    item.EquipAvatar = 0; // Unequip the relic
+                    itemsToUnequip.Add(item);
+                }
             }
-        }
-        // remove light cone
-        if (path.EquipId != 0)
-        {
-            var oldItem = player.InventoryManager!.Data.EquipmentItems.Find(x => x.UniqueId == path.EquipId);
-            if (oldItem != null)
-            {
-                oldItem.EquipAvatar = 0;
-                await player.SendPacket(new PacketPlayerSyncScNotify(oldItem));
-            }
-        }
 
-        avatar.PathInfoes.Remove(path.PathId);
-        if (avatar.PathInfoes.Count == 0)
-        {
-            player.AvatarManager!.AvatarData.Avatars.Remove(avatar);
+            if (pathInfo.EquipId != 0)
+            {
+                var equipment = player.InventoryManager!.Data.EquipmentItems.Find(x => x.UniqueId == pathInfo.EquipId);
+                if (equipment != null)
+                {
+                    equipment.EquipAvatar = 0; // Unequip the light cone
+                    itemsToUnequip.Add(equipment);
+                }
+            }
         }
+        await player.SendPacket(new PacketPlayerSyncScNotify(itemsToUnequip));
+        player.AvatarManager!.AvatarData.Avatars.Remove(avatar);
+        DatabaseHelper.SaveInstance(player.AvatarManager!.AvatarData);
+        await player.SendPacket(new PacketPlayerSyncScNotify(avatar));
 
         await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.RemoveAvatarSuccess"));
+        await arg.Target!.Player!.SendPacket(new PacketPlayerKickOutScNotify());
+        arg.Target!.Stop();
     }
 
 }

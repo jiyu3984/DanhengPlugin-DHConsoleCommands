@@ -15,7 +15,7 @@ public class CommandGameText : ICommand
     static Dictionary<long, string> textMap = new();
 
     [CommandMethod("0 avatar")]
-    public async ValueTask getAvatarText(CommandArg arg)
+    public async ValueTask GetAvatarText(CommandArg arg)
     {
         arg.CharacterArgs.TryGetValue("#", out var lang);
         if (lang == null || lang == "")
@@ -24,7 +24,7 @@ public class CommandGameText : ICommand
             return;
         }
 
-        loadTextMap(lang);
+        LoadTextMap(lang);
 
         StringBuilder output = new();
         foreach (var avatar in GameData.AvatarConfigData.Values)
@@ -37,7 +37,7 @@ public class CommandGameText : ICommand
     }
 
     [CommandMethod("0 item")]
-    public async ValueTask getItemText(CommandArg arg)
+    public async ValueTask GetItemText(CommandArg arg)
     {
         arg.CharacterArgs.TryGetValue("#", out var lang);
         if (lang == null || lang == "")
@@ -46,7 +46,7 @@ public class CommandGameText : ICommand
             return;
         }
 
-        loadTextMap(lang);
+        LoadTextMap(lang);
 
         StringBuilder output = new();
         foreach (var item in GameData.ItemConfigData.Values)
@@ -58,7 +58,7 @@ public class CommandGameText : ICommand
     }
 
     [CommandMethod("0 mainmission")]
-    public async ValueTask getMainMissionText(CommandArg arg)
+    public async ValueTask GetMainMissionText(CommandArg arg)
     {
         arg.CharacterArgs.TryGetValue("#", out var lang);
         if (lang == null || lang == "")
@@ -67,7 +67,7 @@ public class CommandGameText : ICommand
             return;
         }
 
-        loadTextMap(lang);
+        LoadTextMap(lang);
 
         StringBuilder output = new();
         foreach (var mission in GameData.MainMissionData.Values)
@@ -79,7 +79,7 @@ public class CommandGameText : ICommand
     }
 
     [CommandMethod("0 submission")]
-    public async ValueTask getSubmissionText(CommandArg arg)
+    public async ValueTask GetSubmissionText(CommandArg arg)
     {
         arg.CharacterArgs.TryGetValue("#", out var lang);
         if (lang == null || lang == "")
@@ -88,7 +88,7 @@ public class CommandGameText : ICommand
             return;
         }
 
-        loadTextMap(lang);
+        LoadTextMap(lang);
 
         StringBuilder output = new();
         foreach (var mission in GameData.SubMissionData.Values)
@@ -100,7 +100,7 @@ public class CommandGameText : ICommand
     }
 
     [CommandMethod("0 relic")]
-    public async ValueTask getRelicTypes(CommandArg arg)
+    public async ValueTask GetRelicTypes(CommandArg arg)
     {
         StringBuilder output = new();
         foreach (var relic in GameData.RelicConfigData.Values)
@@ -111,12 +111,12 @@ public class CommandGameText : ICommand
     }
 
     [CommandDefault]
-    public async ValueTask getGameText(CommandArg arg)
+    public async ValueTask GetGameText(CommandArg arg)
     {
         await arg.SendMsg("Usage: /gametext <avatar/item/mainmission/submission> #<language>");
     }
 
-    private static void loadTextMap(string lang)
+    private static void LoadTextMap(string lang)
     {
         if (lang == currentLanguage) return;
         var textMapPath = ConfigManager.Config.Path.ResourcePath + "/TextMap/TextMap" + lang + ".json";
