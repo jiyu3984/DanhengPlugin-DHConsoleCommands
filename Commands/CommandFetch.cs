@@ -151,17 +151,9 @@ public class CommandFetch : ICommand
                         continue;
                     }
                     long distance = GetDistance(playerPos, prop.Position);
-                    string excel = prop.Excel.IsDoor ? "door" :
-                            prop.PropInfo.ChestID > 0 ? "chest" :
-                            prop.PropInfo.CocoonID > 0 ? "cocoon" :
-                            prop.PropInfo.FarmElementID > 0 ? "farmelement" :
-                            "other";
-
-                    string type = prop.Excel.PropType.ToString().Replace("PROP_", "");
-
+                    string type = prop.Excel.IsDoor ? "door" : prop.Excel.PropType.ToString().Replace("PROP_", "").ToLower();
                     string states = string.Join(",", prop.Excel.PropStateList.Select(x => $"{x}:{(int)x}"));
-
-                    output.Add($"{entity.GroupID}-{prop.PropInfo.ID}[{distance}]: {excel} {type} {prop.Excel.ID} {prop.State}:{(int)prop.State} ({states})", distance);
+                    output.Add($"{entity.GroupID}-{prop.PropInfo.ID}[{distance}]: {type} {prop.Excel.ID} {prop.State}:{(int)prop.State} ({states})", distance);
                 }
                 catch (Exception ex)
                 {
