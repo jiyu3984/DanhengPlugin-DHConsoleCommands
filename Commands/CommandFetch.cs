@@ -157,7 +157,7 @@ public class CommandFetch : ICommand
                 }
                 catch (Exception ex)
                 {
-                    output.Add($"Error processing entity {prop.PropInfo.ID}: {ex.Message}", long.MinValue);
+                    output.Add($"Error processing entity {entity.GroupID}-{prop.PropInfo.ID}: {ex.Message}", long.MinValue);
                 }
             }
         }

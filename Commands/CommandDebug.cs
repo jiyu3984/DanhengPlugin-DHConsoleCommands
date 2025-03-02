@@ -9,7 +9,7 @@ using EggLink.DanhengServer.Proto;
 
 namespace DanhengPlugin.DHConsoleCommands.Commands;
 
-[CommandInfo("debug", "debug item equip status", "Usage: /debug <avataritem/avatarrelic/item/relic>")]
+[CommandInfo("debuglink", "debug item equip status", "Usage: /debuglink <avataritem/avatarrelic/item/relic>")]
 public class CommandDebug : ICommand
 {
 

@@ -31,8 +31,8 @@ Then place it in the `Plugins` folder in your Danheng server directory.
   - `gametext item #<language>` return item id to translation for certain language
   - `gametext mainmission #<language>` return main mission id to translation for certain language
   - `gametext submission #<language>` return submission id to translation for certain language
-- debug
-  - `debug item` show item to character equip status
-  - `debug relic` show relic to character equip status
-  - `debug avataritem` show character to item equip status
-  - `debug avatarrelic` show character to relic equip status
+- debuglink
+  - `debuglink item` show item to character equip status
+  - `debuglink relic` show relic to character equip status
+  - `debuglink avataritem` show character to item equip status
+  - `debuglink avatarrelic` show character to relic equip status
