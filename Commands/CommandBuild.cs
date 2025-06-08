@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using DanhengPlugin.DHConsoleCommands.Data;
 using EggLink.DanhengServer.Command;
 using EggLink.DanhengServer.Command.Command;
@@ -105,11 +105,11 @@ public class CommandBuild : ICommand
         await BuildAvatar(avatar, arg);
     }
 
-    public async ValueTask BuildAvatar(AvatarInfo avatar, CommandArg arg, bool dryRun = false)
+    public async ValueTask BuildAvatar(BaseAvatarInfo avatar, CommandArg arg, bool dryRun = false)
     {
         // build avatar
         var player = arg.Target!.Player!;
-        PluginGameData.AvatarRelicRecommendData.TryGetValue(avatar.GetAvatarId(), out var excel);
+        PluginGameData.AvatarRelicRecommendData.TryGetValue(avatar.AvatarId, out var excel);
         if (excel is null)
         {
             await arg.SendMsg(I18NManager.Translate("DHConsoleCommands.NoRecommend"));
@@ -188,7 +188,7 @@ public class CommandBuild : ICommand
             {
                 await arg.SendMsg($@"Building {type}: /relic {GetItemStr(relic)} l15 x1");
                 await player.InventoryManager.AddItem(relic, false);
-                await player.InventoryManager.EquipRelic(avatar.GetAvatarId(), relic.UniqueId, i + 1);
+                await player.InventoryManager.EquipRelic(avatar.AvatarId, relic.UniqueId, i + 1);
             }
         }
 
