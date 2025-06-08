@@ -3,6 +3,7 @@ name: Build and Attach to Release
 on:
   release:
     types: [published]
+  workflow_dispatch:  # 添加手动触发
 
 permissions:
   contents: write
@@ -20,15 +21,58 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Build project
-        run: dotnet build --configuration Debug
+      - name: Restore dependencies
+        run: dotnet restore
 
-      - name: Upload DLL to Release
+      - name: Build project (Debug)
+        run: dotnet build --configuration Debug --no-restore
+
+      - name: Build project (Release)
+        run: dotnet build --configuration Release --no-restore
+
+      # 当通过 release 事件触发时，上传到 release
+      - name: Upload Debug DLL to Release
+        if: github.event_name == 'release'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./bin/Debug/net8.0/DanhengPlugin-DHConsoleCommands.dll
-          asset_name: DanhengPlugin-DHConsoleCommands.dll
+          asset_name: DanhengPlugin-DHConsoleCommands-Debug.dll
           asset_content_type: application/octet-stream
+
+      - name: Upload Release DLL to Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./bin/Release/net8.0/DanhengPlugin-DHConsoleCommands.dll
+          asset_name: DanhengPlugin-DHConsoleCommands-Release.dll
+          asset_content_type: application/octet-stream
+
+      # 当手动触发时，上传为 artifact
+      - name: Upload Debug Build Artifact
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: DanhengPlugin-DHConsoleCommands-Debug
+          path: ./bin/Debug/net8.0/DanhengPlugin-DHConsoleCommands.dll
+
+      - name: Upload Release Build Artifact
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: DanhengPlugin-DHConsoleCommands-Release
+          path: ./bin/Release/net8.0/DanhengPlugin-DHConsoleCommands.dll
+
+      # 显示构建信息
+      - name: Show build info
+        run: |
+          echo "Build completed successfully!"
+          echo "Debug DLL location: ./bin/Debug/net8.0/DanhengPlugin-DHConsoleCommands.dll"
+          echo "Release DLL location: ./bin/Release/net8.0/DanhengPlugin-DHConsoleCommands.dll"
+          ls -la ./bin/Debug/net8.0/ || echo "Debug folder not found"
+          ls -la ./bin/Release/net8.0/ || echo "Release folder not found"
